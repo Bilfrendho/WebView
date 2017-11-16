@@ -9,7 +9,8 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 public class MainActivity extends AppCompatActivity {
-    WebView mywebview;
+    WebView mywebvieww;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,12 +27,12 @@ public class MainActivity extends AppCompatActivity {
 //                        .setAction("Action", null).show();
 //            }
 //        });
-        mywebview=(WebView)findViewById(R.id.mywebview);
-        WebSettings webSettings=mywebview.getSettings();
+        mywebvieww=(WebView)findViewById(R.id.mywebview);
+        WebSettings webSettings=mywebvieww.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        mywebview.loadUrl("https://www.google.com/");
-        mywebview.loadUrl("https://www.bing.com/");
-        mywebview.loadUrl("https://www.facebook.com/");
+        mywebvieww.loadUrl("https://www.google.com/");
+        mywebvieww.loadUrl("https://www.bing.com/");
+        mywebvieww.loadUrl("https://www.facebook.com/");
 //        mywebview.setWebViewClient(new WebViewClient());
     }
 
