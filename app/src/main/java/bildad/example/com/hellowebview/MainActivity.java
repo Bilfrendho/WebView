@@ -1,60 +1,72 @@
 package bildad.example.com.hellowebview;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.os.Bundle;
+import android.provider.ContactsContract;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.webkit.WebSettings;
-import android.webkit.WebView;
+import android.widget.ListView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
-    WebView mywebvieww;
 
+    public static final int RequestPermissionCode = 2;
+
+    ListView listView;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
 
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-        mywebvieww=(WebView)findViewById(R.id.mywebview);
-        WebSettings webSettings=mywebvieww.getSettings();
-        webSettings.setJavaScriptEnabled(true);
-        mywebvieww.loadUrl("https://www.google.com/");
-        mywebvieww.loadUrl("https://www.bing.com/");
-        mywebvieww.loadUrl("https://www.facebook.com/");
-//        mywebview.setWebViewClient(new WebViewClient());
-    }
+        listView = (ListView) findViewById(R.id.contacts);
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.READ_CONTACTS) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{
+                    Manifest.permission.READ_CONTACTS}, RequestPermissionCode);
+        }else {
+            listView.setAdapter(new ContactAdapter(this, getContacts()));
         }
 
-        return super.onOptionsItemSelected(item);
+
+    }
+
+    public ArrayList<String> getContacts() {
+        ArrayList<String> contacts = new ArrayList<String>();
+        Cursor cursor = getContentResolver().query(ContactsContract.CommonDataKinds.Phone.CONTENT_URI, null, null, null, null);
+
+        try {
+            cursor.moveToFirst();
+            while (cursor.moveToNext()) {
+                String name = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME));
+
+                String phonenumber = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
+
+                contacts.add(String.format("%s %s", name, phonenumber));
+
+            }
+
+            cursor.close();
+        } catch (Exception ignored) {
+        }
+
+        return contacts;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (requestCode == RequestPermissionCode) {
+            if (!(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)) {
+                Toast.makeText(this, "Please give us the permission, Pretty please", Toast.LENGTH_SHORT).show();
+            } else {
+                listView.setAdapter(new ContactAdapter(this, getContacts()));
+            }
+        }
     }
 }
